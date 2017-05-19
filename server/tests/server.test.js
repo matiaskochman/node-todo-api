@@ -4,8 +4,17 @@ const request = require('supertest');
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
 
+
+const todoList = [{
+  text:'1st todo'
+},{
+  text:'2nd todo'
+}];
+
 beforeEach((done)=>{
-  Todo.remove({}).then(()=>done());
+  Todo.remove({}).then(()=>{
+    return Todo.insertMany(todoList);
+  }).then(()=>done());
 
 });
 
@@ -28,7 +37,7 @@ describe('POST /todos',()=>{
         // verificamos lo que se guardo en la base
         // despues de hacer el test
 
-        Todo.find().then((todos)=>{
+        Todo.find({text:'test todo'}).then((todos)=>{
           expect(todos.length).toBe(1);
           expect(todos[0].text).toBe(text);
           done();
@@ -50,7 +59,7 @@ describe('POST /todos',()=>{
         //que no se haya guardado data.
 
         Todo.find().then((todos)=>{
-          expect(todos.length).toBe(0);
+          expect(todos.length).toBe(2);
           done();
         }).catch((err)=> done(err));
       });
