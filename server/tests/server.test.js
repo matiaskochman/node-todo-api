@@ -25,9 +25,32 @@ describe('POST /todos',()=>{
           return done(err);
         }
 
+        // verificamos lo que se guardo en la base
+        // despues de hacer el test
+
         Todo.find().then((todos)=>{
           expect(todos.length).toBe(1);
           expect(todos[0].text).toBe(text);
+          done();
+        }).catch((err)=> done(err));
+      });
+  });
+
+  it('should not create todo with invalid body data',(done)=>{
+    request(app)
+      .post('/todos')
+      .send({})
+      .expect(400)
+      .end((err,res)=>{
+        if(err){
+          done(err);
+        }
+
+        //verificamos la base para chequear
+        //que no se haya guardado data.
+
+        Todo.find().then((todos)=>{
+          expect(todos.length).toBe(0);
           done();
         }).catch((err)=> done(err));
       });
