@@ -19,7 +19,6 @@ app.post('/todos',(req,res)=>{
   todo.save().then((doc)=>{
     res.send(doc);
   }).catch((e)=>{
-    console.log('not saving todo');
     res.status(400).send(e);
   })
   console.log(req.body);
@@ -70,8 +69,8 @@ app.delete('/todos/:id',(req,res)=>{
     if(!todo){
       res.status(404).send();
     }
+    console.log('encontró');
     res.status(200).send({todo});
-    console.log(todo);
   }).catch((err) => {
     res.status(400).send();
   });
