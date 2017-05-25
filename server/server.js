@@ -9,6 +9,7 @@ const port = process.env.PORT || 3000;
 var {mongoose} = require('./db/mongoose');
 var {User} = require('./models/user');
 var {Todo} = require('./models/todo');
+var authenticate = require('./middleware/authenticate');
 
 var app = express();
 app.use(bodyParser.json());
@@ -122,6 +123,10 @@ app.post('/users',(req,res)=>{
 });
 
 
+
+app.get('/users/me',authenticate,(req,res) => {
+  res.send(req.user);
+});
 
 app.listen(port,()=>{
   console.log(`server listening in port ${port}`);
