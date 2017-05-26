@@ -109,7 +109,6 @@ describe('DELETE /todos/:id',()=>{
       .delete(`/todos/${hexId}`)
       .expect(200)
       .expect( (res) => {
-        console.log(res.body.todo);
         expect(res.body.todo._id).toBe(hexId);
       })
       .end((err,res)=>{
@@ -236,6 +235,8 @@ describe('POST /users', () => {
           expect(user).toExist();
           expect(user.password).toNotBe(password);
           done();
+        }).catch((err) => {
+          done(err);
         });
       });
   });
@@ -257,4 +258,47 @@ describe('POST /users', () => {
       .expect(400)
       .end(done);
   });
+});
+
+describe('POST /users/login',() => {
+  it('should login user and return auth token',(done) => {
+      request(app)
+        .post('/users/login')
+        .send(
+          {email:userList[0].email,
+          password:userList[0].password
+        })
+        .expect(200)
+        .expect((res) => {
+          expect(res.headers['x-auth']).toExist();
+        })
+        .end((err,res) => {
+          if(!err){
+            done(err);
+          }
+
+          User.findById(userList[0]._id).then((user) => {
+
+            expect(user.tokens[0]).toInclude({
+              access:'auth',
+              token: res.headers['x-auth']
+            });
+            done();
+          }).catch((err) => {
+            done(err);
+          });
+
+        });
+  });
+
+  // it('should reject invalid login',(done) => {
+  //   request(app)
+  //     .post('/users/login')
+  //     .send({
+  //       email:'matias@sd.com',
+  //       password:'pepepurapala'
+  //     })
+  //     .expect(400)
+  //     .end(done);
+  // })
 });

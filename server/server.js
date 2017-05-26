@@ -24,7 +24,6 @@ app.post('/todos',(req,res)=>{
   }).catch((e)=>{
     res.status(400).send(e);
   })
-  console.log(req.body);
 });
 
 //List all
@@ -40,7 +39,6 @@ app.get('/todos',(req,res) => {
 app.get('/todos/:id',(req,res) => {
 
   const id = req.params.id;
-  console.log(req.params);
   //valid id using isValid
     //404 - send back empty
     if(!ObjectID.isValid(id)){
@@ -72,7 +70,6 @@ app.delete('/todos/:id',(req,res) => {
     if(!todo){
       res.status(404).send();
     }
-    console.log('encontró');
     res.status(200).send({todo});
   }).catch((err) => {
     res.status(400).send();
