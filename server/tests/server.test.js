@@ -275,7 +275,7 @@ describe('POST /users/login',() => {
         })
         .end((err,res) => {
           if(!err){
-            done(err);
+            return done(err);
           }
 
           User.findById(userList[1]._id).then((user) => {
@@ -293,15 +293,33 @@ describe('POST /users/login',() => {
   });
 
   it('should reject invalid login',(done) => {
-    // request(app)
-    //   .post('/users/login')
-    //   .send({
-    //     email:'matias@sd.com',
-    //     password:'pepepurapala'
-    //   })
-    //   .expect(400)
-    //   .end(done);
-    done();
+    request(app)
+      .post('/users/login')
+      .send({
+        email:'matias@as.coom',
+        password:'asdfasd'
+      })
+      .expect(400)
+      .expect((res) => {
+        expect(res.headers['x-auth']).toNotExist();
+      })
+      .end((err,res) => {
+        if(!err){
+          return done(err);
+        }
+
+        User.findById(userList[1]._id).then((user) => {
+
+          expect(user.tokens[0]).toNotInclude({
+            access:'auth',
+            token: res.headers['x-auth']
+          });
+          done();
+        }).catch((err) => {
+          done(err);
+        });
+
+      });
   });
 
 });
