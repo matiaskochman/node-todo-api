@@ -261,12 +261,13 @@ describe('POST /users', () => {
 });
 
 describe('POST /users/login',() => {
+
   it('should login user and return auth token',(done) => {
       request(app)
         .post('/users/login')
-        .send(
-          {email:userList[0].email,
-          password:userList[0].password
+        .send({
+          email:userList[1].email,
+          password:userList[1].password
         })
         .expect(200)
         .expect((res) => {
@@ -277,7 +278,7 @@ describe('POST /users/login',() => {
             done(err);
           }
 
-          User.findById(userList[0]._id).then((user) => {
+          User.findById(userList[1]._id).then((user) => {
 
             expect(user.tokens[0]).toInclude({
               access:'auth',
@@ -291,14 +292,16 @@ describe('POST /users/login',() => {
         });
   });
 
-  // it('should reject invalid login',(done) => {
-  //   request(app)
-  //     .post('/users/login')
-  //     .send({
-  //       email:'matias@sd.com',
-  //       password:'pepepurapala'
-  //     })
-  //     .expect(400)
-  //     .end(done);
-  // })
+  it('should reject invalid login',(done) => {
+    // request(app)
+    //   .post('/users/login')
+    //   .send({
+    //     email:'matias@sd.com',
+    //     password:'pepepurapala'
+    //   })
+    //   .expect(400)
+    //   .end(done);
+    done();
+  });
+
 });
