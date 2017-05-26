@@ -80,6 +80,35 @@ UserSchema.statics.findByToken = function(token){
   });
 }
 
+UserSchema.statics.findByCredentials = function(email,password){
+  var User = this;
+
+  var a = User.findOne({email}).then((usr) => {
+    debugger;
+    if(!usr){
+      return new Promise.reject();
+    }
+
+    /*
+    devuelvo una Promise porque bcrypt devuelve un callback,
+    entonces wrapeo el callback en una Promise
+    */
+    return new Promise((resolve,reject) => {
+      bcrypt.compare(password,usr.password,(err,res) =>{
+        debugger;
+        if(res){
+          resolve(usr);
+        }else{
+          reject();
+        }
+      });
+    });
+  });
+
+  return a;
+
+}
+
 UserSchema.pre('save', function(next){
   var user = this;
 
