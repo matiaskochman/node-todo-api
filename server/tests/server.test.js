@@ -4,9 +4,11 @@ const {ObjectID} =require('mongodb');
 
 const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
-const {todoList,populateTodos} = require('./seed/seed');
+const {User} = require('./../models/user');
+const {todoList,populateTodos,userList,populateUsers} = require('./seed/seed');
 
 
+beforeEach(populateUsers);
 
 beforeEach(populateTodos);
 
@@ -179,4 +181,80 @@ describe('PATCH /todos/:id',() => {
   });
 
 
+});
+
+describe('GET /users/me',(done) => {
+
+  it('should return user if authenticated', (done) => {
+
+  request(app)
+    .get('/users/me')
+    .set('x-auth',userList[0].tokens[0].token)
+    .expect(200)
+    .expect((res) => {
+      expect(res.body._id).toBe(userList[0]._id.toHexString());
+      expect(res.body.email).toBe(userList[0].email);
+    })
+    .end(done);
+  });
+
+  it('should return 401 if not authenticated',(done) => {
+    request(app)
+      .get('/users/me')
+      .set('x-auth','pepe pura pala')
+      .expect(401)
+      .expect((res) => {
+        expect(res.body).toEqual({});
+      })
+      .end(done);
+  })
+});
+
+
+describe('POST /users', () => {
+
+  it('should create a user', (done) => {
+    var email = 'matiaskochman@gmail.com';
+    var password = 'pedropurapala';
+
+    request(app)
+      .post('/users')
+      .send({email,password})
+      .expect(200)
+      .expect((res) => {
+        expect(res.headers['x-auth']).toExist();
+        expect(res.body._id).toExist();
+        expect(res.body.email).toBe(email);
+
+      })
+      .end((err) => {
+        if(err){
+          done(err);
+        }
+
+        User.findOne({email}).then((user) => {
+          expect(user).toExist();
+          expect(user.password).toNotBe(password);
+          done();
+        });
+      });
+  });
+
+  it('should return validation errors if request invalid', (done) => {
+
+    request(app)
+      .post('/users')
+      .send({email:'234',passwordd:'pee'})
+      .expect(400)
+      .end(done);
+  });
+
+  it('should not create user if email in use', (done) => {
+
+    request(app)
+      .post('/users')
+      .send({email:userList[0].email,password:'password123'})
+      .expect(400)
+      .end(done);
+  });
 });
