@@ -296,8 +296,8 @@ describe('POST /users/login',() => {
     request(app)
       .post('/users/login')
       .send({
-        email:'matias@as.coom',
-        password:'asdfasd'
+        email:userList[1].email,
+        password:userList[1].password + '1'
       })
       .expect(400)
       .expect((res) => {
@@ -310,10 +310,7 @@ describe('POST /users/login',() => {
 
         User.findById(userList[1]._id).then((user) => {
 
-          expect(user.tokens[0]).toNotInclude({
-            access:'auth',
-            token: res.headers['x-auth']
-          });
+          expect(user.tokens.length).toBe(0);
           done();
         }).catch((err) => {
           done(err);
