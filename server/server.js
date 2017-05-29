@@ -15,9 +15,10 @@ var app = express();
 app.use(bodyParser.json());
 
 //insert
-app.post('/todos',(req,res)=>{
+app.post('/todos',authenticate,(req,res)=>{
   var todo = new Todo({
-    text:req.body.text
+    text:req.body.text,
+    _creator : req.user._id
   });
   todo.save().then((doc)=>{
     res.send(doc);
@@ -27,8 +28,10 @@ app.post('/todos',(req,res)=>{
 });
 
 //List all
-app.get('/todos',(req,res) => {
-  Todo.find().then( (todos) => {
+app.get('/todos',authenticate,(req,res) => {
+  Todo.find({
+    _creator:req.user._id
+  }).then( (todos) => {
     res.status(200).send({todos});
   },(e)=>{
     res.status(400).send(e);
@@ -36,17 +39,19 @@ app.get('/todos',(req,res) => {
 });
 
 //Get one
-app.get('/todos/:id',(req,res) => {
+app.get('/todos/:id',authenticate,(req,res) => {
 
   const id = req.params.id;
   //valid id using isValid
     //404 - send back empty
     if(!ObjectID.isValid(id)){
-      console.log('ID is not valid');
-      res.status(404).send();
+      return res.status(404).send();
     }
 
-    Todo.findById(id).then( (todo) => {
+    Todo.findOne({
+      _id:id,
+      _creator:req.user._id
+    }).then( (todo) => {
       if(!todo){
         return res.status(404).send();
       }
@@ -58,17 +63,20 @@ app.get('/todos/:id',(req,res) => {
 });
 
 //deleteOne
-app.delete('/todos/:id',(req,res) => {
+app.delete('/todos/:id',authenticate,(req,res) => {
 
   const id = req.params.id;
 
   if(!ObjectID.isValid(id)){
-    res.status(404).send();
+    return res.status(404).send();
   }
 
-  Todo.findByIdAndRemove(id).then( (todo) => {
+  Todo.findOneAndRemove({
+    _id:id,
+    _creator:req.user._id
+  }).then( (todo) => {
     if(!todo){
-      res.status(404).send();
+      return res.status(404).send();
     }
     res.status(200).send({todo});
   }).catch((err) => {
@@ -77,14 +85,14 @@ app.delete('/todos/:id',(req,res) => {
 
 });
 
-app.patch('/todos/:id',(req,res) => {
+app.patch('/todos/:id',authenticate,(req,res) => {
   const id = req.params.id;
 
   //subset of the things the user passed to us
   //to avoid the user update anything he wants.
   var body = _.pick(req.body,['text','completed']);
   if(!ObjectID.isValid(id)){
-    res.status(404).send();
+    return res.status(404).send();
   }
 
   if(_.isBoolean(body.completed) && body.completed){
@@ -94,12 +102,20 @@ app.patch('/todos/:id',(req,res) => {
     body.completedAt = null;
   }
 
-  Todo.findByIdAndUpdate(id,{$set:body},{new:true}).then((todo) => {
+  // console.log('_id: ',id)
+  // console.log('_creator: ',req.user._id)
+
+  Todo.findOneAndUpdate({
+    _id:id,
+    _creator:req.user._id
+  },{$set:body},{new:true}).then((todo) => {
     if(!todo){
-      res.status(404).send();
+      return res.status(404).send();
     }
     res.status(200).send({todo});
-  });
+  }).catch((error) => {
+    console.log(error);
+  })
 });
 
 app.post('/users',(req,res)=>{

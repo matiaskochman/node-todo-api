@@ -10,24 +10,35 @@ const userList = [{
   _id:userId1,
   email:'test1@test.com',
   password:'password1',
-  tokens: [{
-    access:'auth',
-    token: jwt.sign({_id: userId1, access:'auth'},'abc123').toString()
-  }]},
+    tokens: [{
+          access:'auth',
+          token: jwt.sign({_id: userId1, access:'auth'},'abc123').toString()
+          }
+    ]
+},
   {
     _id:userId2,
     email:'test2@test.com',
-    password:'password2'}
-  ];
+    password:'password2',
+    tokens: [{
+          access:'auth',
+          token: jwt.sign({_id: userId2, access:'auth'},'abc123').toString()
+          }
+    ]
+
+  }
+];
 
 const todoList = [{
   _id: new ObjectID(),
-  text:'1st todo'
+  text:'1st todo',
+  _creator:userId1
 },{
   _id: new ObjectID(),
   text:'2nd todo',
   completed: true,
-  completedAt: 555
+  completedAt: 555,
+  _creator: userId2
 }];
 
 const populateTodos = (done) => {

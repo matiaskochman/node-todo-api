@@ -96,7 +96,6 @@ UserSchema.statics.findByCredentials = function(email,password){
   var User = this;
 
   var a = User.findOne({email}).then((usr) => {
-    debugger;
     if(!usr){
       return new Promise.reject();
     }
@@ -107,7 +106,6 @@ UserSchema.statics.findByCredentials = function(email,password){
     */
     return new Promise((resolve,reject) => {
       bcrypt.compare(password,usr.password,(err,res) =>{
-        debugger;
         if(res){
           resolve(usr);
         }else{
