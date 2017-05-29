@@ -12,7 +12,7 @@ const userList = [{
   password:'password1',
     tokens: [{
           access:'auth',
-          token: jwt.sign({_id: userId1, access:'auth'},'abc123').toString()
+          token: jwt.sign({_id: userId1, access:'auth'},process.env.JWT_SECRET).toString()
           }
     ]
 },
@@ -22,7 +22,7 @@ const userList = [{
     password:'password2',
     tokens: [{
           access:'auth',
-          token: jwt.sign({_id: userId2, access:'auth'},'abc123').toString()
+          token: jwt.sign({_id: userId2, access:'auth'},process.env.JWT_SECRET).toString()
           }
     ]
 
@@ -44,7 +44,10 @@ const todoList = [{
 const populateTodos = (done) => {
   Todo.remove({}).then(()=>{
     return Todo.insertMany(todoList);
-  }).then(() => done());
+  }).then(() => done())
+  .catch((err) => {
+    done(err);
+  });
 };
 
 const populateUsers = (done) => {
@@ -55,7 +58,7 @@ const populateUsers = (done) => {
   }).then(() => {
     done()
   }).catch((e) => {
-    console.log(e);
+    done(e);
   });
 };
 
